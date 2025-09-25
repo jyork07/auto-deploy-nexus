@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Play, Pause, RefreshCw, Activity, Zap, Brain, Database } from "lucide-react";
+import { Settings, Play, Pause, RefreshCw, Activity, Zap, Brain, Database, TrendingUp, BarChart3 } from "lucide-react";
 import { PipelineManager } from "@/components/PipelineManager";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { SystemMonitor } from "@/components/SystemMonitor";
 import { AIInsights } from "@/components/AIInsights";
+import { ContentDiscovery } from "@/components/ContentDiscovery";
+import { AutopilotDashboard } from "@/components/AutopilotDashboard";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -77,25 +80,37 @@ const Dashboard = () => {
 
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-card">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <Activity className="h-4 w-4" />
+          <TabsList className="grid w-full grid-cols-8 bg-card text-xs">
+            <TabsTrigger value="overview" className="flex items-center gap-1">
+              <Activity className="h-3 w-3" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="pipeline" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
+            <TabsTrigger value="autopilot" className="flex items-center gap-1">
+              <Zap className="h-3 w-3" />
+              Autopilot
+            </TabsTrigger>
+            <TabsTrigger value="discovery" className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              Discovery
+            </TabsTrigger>
+            <TabsTrigger value="pipeline" className="flex items-center gap-1">
+              <Brain className="h-3 w-3" />
               Pipeline
             </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <Brain className="h-4 w-4" />
+            <TabsTrigger value="analytics" className="flex items-center gap-1">
+              <BarChart3 className="h-3 w-3" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="insights" className="flex items-center gap-1">
+              <Brain className="h-3 w-3" />
               AI Insights
             </TabsTrigger>
-            <TabsTrigger value="monitor" className="flex items-center gap-2">
-              <Database className="h-4 w-4" />
+            <TabsTrigger value="monitor" className="flex items-center gap-1">
+              <Database className="h-3 w-3" />
               Monitor
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
+            <TabsTrigger value="settings" className="flex items-center gap-1">
+              <Settings className="h-3 w-3" />
               Settings
             </TabsTrigger>
           </TabsList>
@@ -184,8 +199,20 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="autopilot">
+            <AutopilotDashboard />
+          </TabsContent>
+
+          <TabsContent value="discovery">
+            <ContentDiscovery />
+          </TabsContent>
+
           <TabsContent value="pipeline">
             <PipelineManager isProcessing={isProcessing} />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AnalyticsDashboard />
           </TabsContent>
 
           <TabsContent value="insights">

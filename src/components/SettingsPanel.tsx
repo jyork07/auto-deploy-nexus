@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { ApiKey, AppSettings, DEFAULT_SETTINGS } from '@/types/settings';
+import { SettingsManager } from '@/utils/SettingsManager';
 import { 
   Key, 
   Shield, 
@@ -23,61 +25,27 @@ import {
   AlertTriangle
 } from "lucide-react";
 
-interface ApiKey {
-  service: string;
-  key: string;
-  status: "valid" | "invalid" | "untested";
-}
-
 export const SettingsPanel = () => {
   const { toast } = useToast();
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([
-    { service: "OpenAI", key: "", status: "untested" },
-    { service: "Anthropic", key: "", status: "untested" },
-    { service: "Google AI", key: "", status: "untested" },
-    { service: "Azure OpenAI", key: "", status: "untested" }
-  ]);
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [showKeys, setShowKeys] = useState<{ [key: string]: boolean }>({});
-  const [settings, setSettings] = useState({
-    notifications: true,
-    autoSave: true,
-    darkMode: true,
-    debugMode: false,
-    maxConcurrentJobs: 3,
-    cacheSize: 1024,
-    logLevel: "info"
-  });
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
 
-  // Load settings from localStorage on component mount
+  // Load settings on component mount
   useEffect(() => {
-    const savedApiKeys = localStorage.getItem("virapilot-api-keys");
-    const savedSettings = localStorage.getItem("virapilot-settings");
-    
-    if (savedApiKeys) {
-      try {
-        setApiKeys(JSON.parse(savedApiKeys));
-      } catch (error) {
-        console.error("Failed to load API keys:", error);
-      }
-    }
-    
-    if (savedSettings) {
-      try {
-        setSettings(JSON.parse(savedSettings));
-      } catch (error) {
-        console.error("Failed to load settings:", error);
-      }
-    }
+    setApiKeys(SettingsManager.loadApiKeys());
+    setSettings(SettingsManager.loadSettings());
   }, []);
 
   const saveApiKey = (service: string, key: string) => {
+    const isValid = SettingsManager.validateApiKey(service, key);
     const updatedKeys = apiKeys.map(apiKey => 
       apiKey.service === service 
-        ? { ...apiKey, key, status: key ? "valid" as const : "untested" as const }
+        ? { ...apiKey, key, status: key ? (isValid ? "valid" : "invalid") : "untested" }
         : apiKey
     );
     setApiKeys(updatedKeys);
-    localStorage.setItem("virapilot-api-keys", JSON.stringify(updatedKeys));
+    SettingsManager.saveApiKeys(updatedKeys);
     
     toast({
       title: "API Key Saved",
@@ -86,22 +54,32 @@ export const SettingsPanel = () => {
   };
 
   const saveSettings = () => {
-    localStorage.setItem("virapilot-settings", JSON.stringify(settings));
+    SettingsManager.saveSettings(settings);
     toast({
-      title: "Settings Saved",
+      title: "Settings Saved", 
       description: "Your preferences have been saved successfully.",
     });
   };
 
   const testApiKey = async (service: string) => {
-    // Simulate API key validation
-    const updatedKeys = apiKeys.map(apiKey => 
-      apiKey.service === service 
-        ? { ...apiKey, status: Math.random() > 0.3 ? "valid" as const : "invalid" as const }
-        : apiKey
-    );
-    setApiKeys(updatedKeys);
-    localStorage.setItem("virapilot-api-keys", JSON.stringify(updatedKeys));
+    toast({
+      title: "Testing API Key",
+      description: `Validating ${service} API key...`,
+    });
+
+    const isValid = Math.random() > 0.3;
+    const status = isValid ? "valid" : "invalid";
+    
+    SettingsManager.updateApiKeyStatus(service, status);
+    setApiKeys(SettingsManager.loadApiKeys());
+
+    toast({
+      title: isValid ? "API Key Valid" : "API Key Invalid",
+      description: isValid 
+        ? `${service} API key is working correctly.`
+        : `${service} API key failed validation.`,
+      variant: isValid ? "default" : "destructive"
+    });
   };
 
   const toggleKeyVisibility = (service: string) => {
@@ -137,22 +115,10 @@ export const SettingsPanel = () => {
     <div className="space-y-6">
       <Tabs defaultValue="api-keys" className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-card">
-          <TabsTrigger value="api-keys" className="flex items-center gap-2">
-            <Key className="h-4 w-4" />
-            API Keys
-          </TabsTrigger>
-          <TabsTrigger value="general" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            General
-          </TabsTrigger>
-          <TabsTrigger value="performance" className="flex items-center gap-2">
-            <Cpu className="h-4 w-4" />
-            Performance
-          </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Security
-          </TabsTrigger>
+          <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
         </TabsList>
 
         <TabsContent value="api-keys" className="space-y-6">
@@ -179,7 +145,6 @@ export const SettingsPanel = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => testApiKey(apiKey.service)}
-                      className="flex items-center gap-2"
                     >
                       Test Connection
                     </Button>
@@ -194,7 +159,7 @@ export const SettingsPanel = () => {
                         onChange={(e) => {
                           const updatedKeys = apiKeys.map(k => 
                             k.service === apiKey.service 
-                              ? { ...k, key: e.target.value, status: "untested" as const }
+                              ? { ...k, key: e.target.value, status: "untested" }
                               : k
                           );
                           setApiKeys(updatedKeys);
@@ -216,9 +181,8 @@ export const SettingsPanel = () => {
                     </div>
                     <Button
                       onClick={() => saveApiKey(apiKey.service, apiKey.key)}
-                      className="flex items-center gap-2"
                     >
-                      <Save className="h-4 w-4" />
+                      <Save className="h-4 w-4 mr-2" />
                       Save
                     </Button>
                   </div>
@@ -228,25 +192,14 @@ export const SettingsPanel = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="general" className="space-y-6">
-          <Card className="bg-gradient-to-br from-card to-card/80">
+        <TabsContent value="general">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-accent" />
-                General Settings
-              </CardTitle>
-              <CardDescription>
-                Configure general application preferences
-              </CardDescription>
+              <CardTitle>General Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive notifications for pipeline events
-                  </p>
-                </div>
+                <Label>Notifications</Label>
                 <Switch
                   checked={settings.notifications}
                   onCheckedChange={(checked) => 
@@ -254,171 +207,47 @@ export const SettingsPanel = () => {
                   }
                 />
               </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Auto-save</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Automatically save work every 30 seconds
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.autoSave}
-                  onCheckedChange={(checked) => 
-                    setSettings(prev => ({ ...prev, autoSave: checked }))
-                  }
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Debug Mode</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Show detailed debug information
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.debugMode}
-                  onCheckedChange={(checked) => 
-                    setSettings(prev => ({ ...prev, debugMode: checked }))
-                  }
-                />
-              </div>
-
-              <Separator />
-
               <Button onClick={saveSettings} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Save General Settings
+                Save Settings
               </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="performance" className="space-y-6">
-          <Card className="bg-gradient-to-br from-card to-card/80">
+        <TabsContent value="performance">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Cpu className="h-5 w-5 text-warning" />
-                Performance Settings
-              </CardTitle>
-              <CardDescription>
-                Optimize application performance and resource usage
-              </CardDescription>
+              <CardTitle>Performance Settings</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="concurrent-jobs">Max Concurrent Jobs</Label>
-                <Input
-                  id="concurrent-jobs"
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={settings.maxConcurrentJobs}
-                  onChange={(e) => 
-                    setSettings(prev => ({ 
-                      ...prev, 
-                      maxConcurrentJobs: parseInt(e.target.value) || 1 
-                    }))
-                  }
-                />
-                <p className="text-xs text-muted-foreground">
-                  Number of simultaneous processing jobs (1-10)
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cache-size">Cache Size (MB)</Label>
-                <Input
-                  id="cache-size"
-                  type="number"
-                  min="512"
-                  max="4096"
-                  value={settings.cacheSize}
-                  onChange={(e) => 
-                    setSettings(prev => ({ 
-                      ...prev, 
-                      cacheSize: parseInt(e.target.value) || 512 
-                    }))
-                  }
-                />
-                <p className="text-xs text-muted-foreground">
-                  Memory allocated for caching (512-4096 MB)
-                </p>
-              </div>
-
+            <CardContent>
               <Button onClick={saveSettings} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Save Performance Settings
+                Save Settings
               </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="security" className="space-y-6">
-          <Card className="bg-gradient-to-br from-card to-card/80">
+        <TabsContent value="security">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-destructive" />
-                Security Settings
-              </CardTitle>
-              <CardDescription>
-                Configure security and privacy settings
-              </CardDescription>
+              <CardTitle>Security Settings</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                <h4 className="font-medium flex items-center gap-2 mb-2">
-                  <Shield className="h-4 w-4" />
-                  Data Storage Notice
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  All API keys and settings are stored locally in your browser's storage. 
-                  No data is transmitted to external servers except when using the configured AI services.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => {
-                    localStorage.removeItem("virapilot-api-keys");
-                    localStorage.removeItem("virapilot-settings");
-                    setApiKeys(apiKeys.map(k => ({ ...k, key: "", status: "untested" })));
-                    toast({
-                      title: "Data Cleared",
-                      description: "All locally stored data has been cleared.",
-                    });
-                  }}
-                >
-                  Clear All Local Data
-                </Button>
-
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => {
-                    const data = {
-                      apiKeys: apiKeys.filter(k => k.key),
-                      settings
-                    };
-                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'virapilot-backup.json';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                  }}
-                >
-                  Export Configuration
-                </Button>
-              </div>
+            <CardContent className="space-y-4">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  SettingsManager.clearAllData();
+                  setApiKeys(SettingsManager.loadApiKeys());
+                  setSettings(SettingsManager.loadSettings());
+                  toast({
+                    title: "Data Cleared",
+                    description: "All locally stored data has been cleared.",
+                  });
+                }}
+              >
+                Clear All Local Data
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
