@@ -75,7 +75,7 @@ echo Git installed successfully.
 python --version >nul 2>&1
 if %errorlevel% equ 0 (
     echo Python is already installed.
-    goto :vs_build_tools
+    goto vs_build_tools
 )
 
 echo Installing Python...
