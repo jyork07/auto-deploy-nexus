@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +73,7 @@ export const ContentDiscovery = () => {
     { value: "28", label: "Science & Technology" }
   ];
 
-  const fetchTrendingContent = async () => {
+  const fetchTrendingContent = useCallback(async () => {
     setIsLoading(true);
     try {
       // Simulate API call - in real implementation, this would use YouTubeService
@@ -150,7 +150,7 @@ export const ContentDiscovery = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   const formatNumber = (num: number): string => {
     if (num >= 1000000) {
@@ -175,8 +175,8 @@ export const ContentDiscovery = () => {
   };
 
   useEffect(() => {
-    fetchTrendingContent();
-  }, []);
+    void fetchTrendingContent();
+  }, [fetchTrendingContent]);
 
   return (
     <div className="space-y-6">

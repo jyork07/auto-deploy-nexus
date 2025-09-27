@@ -22,52 +22,58 @@
 - **📈 System Monitoring**: CPU, memory, storage, and network monitoring
 - **🎯 AI Insights**: Smart recommendations for pipeline optimization
 
-## 📦 Quick Installation (Windows)
+## 📦 Quick Installation
 
-### One-Click Installer (Recommended)
+Getting up and running only requires Node.js (version 20 or later) and npm.
 
-1. **Download and Run**: Simply double-click `build-scripts/quick-install.bat`
-2. **Administrator Rights**: The installer will request administrator privileges
-3. **Automated Setup**: All dependencies and the application will be installed automatically
-4. **Desktop Shortcut**: A shortcut will be created on your desktop
-5. **Launch**: Double-click the desktop shortcut to start ViraPilot
+```bash
+# 1. Install dependencies
+npm install
 
-### What the Installer Does:
-- ✅ Installs Node.js (if not present)
-- ✅ Installs Git (if not present)  
-- ✅ Installs Python (if not present)
-- ✅ Installs Visual Studio Build Tools
-- ✅ Builds the React frontend
-- ✅ Packages the Electron desktop app
-- ✅ Creates desktop and start menu shortcuts
-- ✅ Registers for Windows Add/Remove Programs
+# 2. Start the Vite development server
+npm run dev
+```
 
-## 🛠️ Manual Installation
+The app is now available at http://localhost:5173/ and hot-reloads as you work.
 
-### Prerequisites
-- Windows 10/11 (64-bit)
-- Administrator privileges
-- Internet connection for dependency downloads
+### Building the production bundle
 
-### Step-by-Step Guide
+```bash
+# Generate the optimized frontend assets
+npm run build
 
-1. **Install Dependencies** (if not already installed):
+# (Optional) Preview the production build locally
+npm run preview
+
+# Run the code quality checks
+npm run lint
+```
+
+### Packaging the desktop app (optional)
+
+1. Build the web assets as shown above (`npm run build`).
+2. Install the Electron dependencies and run the desired packaging target:
+
    ```bash
-   # Run the dependency installer
-   build-scripts/install-dependencies.bat
+   cd electron
+   npm install
+   # Choose the platform-specific build:
+   npm run build:win   # Windows
+   npm run build:mac   # macOS
+   npm run build:linux # Linux
    ```
 
-2. **Build the Application**:
-   ```bash
-   # Build the complete application
-   build-scripts/build.bat
-   ```
+3. The packaged binaries are placed in `electron/release/`.
 
-3. **Launch ViraPilot**:
-   ```bash
-   # Start the desktop application
-   electron/release/win-unpacked/ViraPilot.exe
-   ```
+### Windows one-click installer (optional)
+
+For automated Windows installations you can still use the legacy helper scripts located in `build-scripts/`:
+
+- `quick-install.bat` – installs prerequisites, builds the app, and creates shortcuts.
+- `install-dependencies.bat` – installs Node.js, Git, Python, and the Visual Studio Build Tools.
+- `build.bat` – builds the frontend and packages the Electron desktop app.
+
+These scripts must be executed from an elevated PowerShell or Command Prompt.
 
 ## 🔧 Configuration
 

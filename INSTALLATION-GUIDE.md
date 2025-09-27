@@ -1,143 +1,58 @@
 # ViraPilot v2.0 - Installation Guide
 
-## 🚀 Quick Start (Double-Click Installation)
+## 🚀 Quick Start
 
-### For Windows Users (Recommended)
+1. **Install Node.js** – version 20 or newer is recommended. The LTS installer from [nodejs.org](https://nodejs.org/) includes npm.
+2. **Install dependencies** – from the project root run:
 
-1. **Download the Project**: Extract all files to a folder (e.g., `C:\ViraPilot`)
-
-2. **Run the Installer**: Double-click `build-scripts\quick-install.bat`
-
-3. **Follow Prompts**: The installer will:
-   - Request administrator privileges (required)
-   - Install Node.js, Git, Python, and Visual Studio Build Tools
-   - Build the React frontend application
-   - Package the Electron desktop application
-   - Create desktop and start menu shortcuts
-   - Register the application with Windows
-
-4. **Launch ViraPilot**: Double-click the desktop shortcut created
-
-⚡ **Total installation time**: 10-15 minutes (depending on internet speed)
-
-## 🛠️ What Gets Installed
-
-### System Dependencies
-- **Node.js v20.10.0**: JavaScript runtime for building the application
-- **Git**: Version control system (required for some npm packages)
-- **Python 3.11.6**: Required for native module compilation
-- **Visual Studio Build Tools**: C++ compiler for native modules
-
-### Application Components
-- **React Frontend**: Modern web-based dashboard interface
-- **Electron Desktop App**: Standalone Windows application
-- **Local Storage System**: Secure settings and API key management
-- **Pipeline Engine**: AI processing and monitoring system
-
-## 📋 System Requirements Check
-
-Before installation, ensure your system meets these requirements:
-
-### ✅ Minimum Requirements
-- Windows 10 (64-bit) Build 1903 or newer
-- 4 GB RAM (8 GB recommended)
-- 2 GB free disk space (5 GB recommended)
-- Internet connection for installation and API calls
-- Administrator privileges
-
-### 🔍 How to Check Your System
-
-1. **Windows Version**:
-   - Press `Win + R`, type `winver`, press Enter
-   - Should show Windows 10 Build 1903+ or Windows 11
-
-2. **RAM**:
-   - Press `Ctrl + Shift + Esc` to open Task Manager
-   - Go to "Performance" tab → "Memory"
-   - Check total physical memory
-
-3. **Disk Space**:
-   - Open File Explorer
-   - Right-click on C: drive → Properties
-   - Check available free space
-
-4. **Administrator Rights**:
-   - Right-click on any .bat file
-   - You should see "Run as administrator" option
-
-## 🔧 Manual Installation (Advanced Users)
-
-If the automatic installer fails or you prefer manual control:
-
-### Step 1: Install Dependencies Manually
-
-1. **Node.js**:
-   - Download from: https://nodejs.org/en/download/
-   - Install the LTS version (20.10.0 or newer)
-   - Verify: Open Command Prompt, run `node --version`
-
-2. **Git**:
-   - Download from: https://git-scm.com/download/win
-   - Install with default settings
-   - Verify: Run `git --version` in Command Prompt
-
-3. **Python**:
-   - Download from: https://www.python.org/downloads/
-   - Install Python 3.11.6 or newer
-   - ⚠️ **Important**: Check "Add Python to PATH" during installation
-   - Verify: Run `python --version` in Command Prompt
-
-4. **Visual Studio Build Tools**:
-   - Download from: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
-   - Install with "C++ build tools" workload
-   - This enables compilation of native Node.js modules
-
-### Step 2: Build the Application
-
-1. **Open Command Prompt as Administrator**:
-   - Press `Win + X` → "Windows PowerShell (Admin)" or "Command Prompt (Admin)"
-
-2. **Navigate to ViraPilot folder**:
-   ```cmd
-   cd "C:\path\to\ViraPilot"
-   ```
-
-3. **Install main dependencies**:
-   ```cmd
+   ```bash
    npm install
    ```
 
-4. **Build React application**:
-   ```cmd
-   npm run build
+3. **Start the development server**:
+
+   ```bash
+   npm run dev
    ```
 
-5. **Install Electron dependencies**:
-   ```cmd
-   cd electron
-   npm install
+   The app is served at http://localhost:5173/ with hot-module reloading enabled.
+
+4. **Build for production** (optional):
+
+   ```bash
+   npm run build    # Create the optimized web bundle
+   npm run preview  # Preview the build locally
+   npm run lint     # Run ESLint to ensure code quality
    ```
 
-6. **Build Electron application**:
-   ```cmd
-   npm run build:win
-   ```
+## 💻 Packaging the Desktop App
 
-7. **Return to main directory**:
-   ```cmd
-   cd ..
-   ```
+The Electron project lives in the `electron/` directory. Packaging requires the web assets built in the previous step.
 
-### Step 3: Create Shortcuts (Manual)
+```bash
+# From the repository root
+npm run build
 
-1. **Desktop Shortcut**:
-   - Right-click on Desktop → New → Shortcut
-   - Target: `C:\path\to\ViraPilot\electron\release\win-unpacked\ViraPilot.exe`
-   - Name: "ViraPilot"
+cd electron
+npm install
 
-2. **Start Menu**:
-   - Create folder: `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\ViraPilot`
-   - Copy the shortcut there
+# Choose the appropriate packaging command for your platform
+npm run build:win    # Windows installer and portable build
+npm run build:mac    # macOS DMG
+npm run build:linux  # Linux AppImage, deb, and rpm
+```
+
+Artifacts are output to `electron/release/`. You can clean the directory between builds if needed.
+
+## 🪟 Windows Helper Scripts (Optional)
+
+Legacy batch files are still provided for teams that prefer a scripted setup:
+
+- `build-scripts\quick-install.bat` – installs prerequisites, builds the app, and creates shortcuts.
+- `build-scripts\install-dependencies.bat` – installs Node.js, Git, Python, and the Visual Studio Build Tools.
+- `build-scripts\build.bat` – rebuilds the frontend and packages the Electron app.
+
+Run these scripts from an elevated PowerShell or Command Prompt session. They are optional and not required for day-to-day development.
 
 ## 🎯 First Launch Setup
 
