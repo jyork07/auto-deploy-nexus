@@ -80,15 +80,9 @@ npm run preview
 npm run lint
 ```
 
-### Windows one-click installer (optional)
+### Windows support
 
-For automated Windows installations you can still use the legacy helper scripts located in `build-scripts/`:
-
-- `quick-install.bat` – installs prerequisites, builds the app, and creates shortcuts.
-- `install-dependencies.bat` – installs Node.js, Git, Python, and the Visual Studio Build Tools.
-- `build.bat` – builds the frontend and packages the Electron desktop app.
-
-These scripts must be executed from an elevated PowerShell or Command Prompt.
+The automated setup script runs on Windows, macOS, and Linux. If you're on Windows and run into permission prompts, launch the terminal **as Administrator** before executing `npm run setup` so the dependency installation can succeed without manual retries.
 
 ## 🔧 Configuration
 
@@ -158,8 +152,8 @@ These scripts must be executed from an elevated PowerShell or Command Prompt.
 - Disable antivirus temporarily during installation
 
 **Application Won't Start**:
-- Check if all dependencies are installed
-- Run `build-scripts/install-dependencies.bat` again
+- Check if all dependencies are installed by re-running `npm run setup`
+- Inspect the terminal output for errors and resolve any missing prerequisites
 - Check Windows Event Viewer for error details
 
 **API Keys Not Working**:

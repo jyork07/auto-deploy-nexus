@@ -66,15 +66,9 @@ npm run build:linux  # Linux AppImage, deb, and rpm
 
 Artifacts are output to `electron/release/`. You can clean the directory between builds if needed.
 
-## 🪟 Windows Helper Scripts (Optional)
+## 🪟 Windows-specific tips
 
-The new setup assistant replaces the legacy batch scripts for most use cases. If you need a fully offline or pre-approved installer flow, the original helpers are still available:
-
-- `build-scripts\quick-install.bat` – installs prerequisites, builds the app, and creates shortcuts.
-- `build-scripts\install-dependencies.bat` – installs Node.js, Git, Python, and the Visual Studio Build Tools.
-- `build-scripts\build.bat` – rebuilds the frontend and packages the Electron app.
-
-Run these scripts from an elevated PowerShell or Command Prompt session. Otherwise, prefer `npm run setup` for the fastest experience.
+The setup assistant works the same on Windows as it does on macOS and Linux. If PowerShell blocks the script, right-click the terminal icon and choose **Run as administrator** before executing `npm run setup`. This ensures the Node.js dependency installation can create the required folders.
 
 ## 🎯 First Launch Setup
 
@@ -161,10 +155,9 @@ The application will open with the dashboard. Navigate to the **Settings** tab t
 ViraPilot will check for updates on startup and notify you when available.
 
 ### Manual Updates
-1. Download the latest version
-2. Run `build-scripts\quick-install.bat` again
-3. The installer will update existing installation
-4. Your settings and API keys will be preserved
+1. Pull the latest changes from Git or download the new release archive.
+2. Run `npm run setup` to reinstall dependencies and rebuild the application.
+3. Your settings and API keys remain stored locally and are not overwritten by the setup assistant.
 
 ## 🗑️ Uninstalling ViraPilot
 
