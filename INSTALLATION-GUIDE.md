@@ -2,28 +2,50 @@
 
 ## 🚀 Quick Start
 
-1. **Install Node.js** – version 20 or newer is recommended. The LTS installer from [nodejs.org](https://nodejs.org/) includes npm.
-2. **Install dependencies** – from the project root run:
+### 1. Install prerequisites
+- **Node.js:** Version 20 LTS or newer from [nodejs.org](https://nodejs.org/).
+- **Git:** Any recent version is fine. (Windows users get it automatically through the helper script if needed.)
 
-   ```bash
-   npm install
-   ```
+### 2. Run the setup assistant
 
-3. **Start the development server**:
+From the project root:
 
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run setup
+```
 
-   The app is served at http://localhost:5173/ with hot-module reloading enabled.
+What happens automatically:
 
-4. **Build for production** (optional):
+| Step | Description |
+|------|-------------|
+| ✅ Version check | Ensures you're running Node.js 20+ |
+| ✅ Dependencies | Installs / updates `node_modules` |
+| ✅ Electron (optional) | Offers to install the packaging toolchain in `electron/` |
+| ✅ Dev server (optional) | Can start `npm run dev` for you when everything is ready |
 
-   ```bash
-   npm run build    # Create the optimized web bundle
-   npm run preview  # Preview the build locally
-   npm run lint     # Run ESLint to ensure code quality
-   ```
+For unattended installs use:
+
+```bash
+npm run setup -- --yes --skip-dev
+```
+
+This accepts the defaults, installs dependencies, and exits without launching the dev server. Add `--skip-electron` to bypass the optional Electron tooling as well.
+
+### 3. Launch the app (if you skipped the prompt)
+
+```bash
+npm run dev
+```
+
+The UI is served at <http://localhost:5173/> with hot-module reloading.
+
+### 4. Build for production (optional)
+
+```bash
+npm run build    # Create the optimized web bundle
+npm run preview  # Preview the build locally
+npm run lint     # Run ESLint to ensure code quality
+```
 
 ## 💻 Packaging the Desktop App
 
@@ -46,13 +68,13 @@ Artifacts are output to `electron/release/`. You can clean the directory between
 
 ## 🪟 Windows Helper Scripts (Optional)
 
-Legacy batch files are still provided for teams that prefer a scripted setup:
+The new setup assistant replaces the legacy batch scripts for most use cases. If you need a fully offline or pre-approved installer flow, the original helpers are still available:
 
 - `build-scripts\quick-install.bat` – installs prerequisites, builds the app, and creates shortcuts.
 - `build-scripts\install-dependencies.bat` – installs Node.js, Git, Python, and the Visual Studio Build Tools.
 - `build-scripts\build.bat` – rebuilds the frontend and packages the Electron app.
 
-Run these scripts from an elevated PowerShell or Command Prompt session. They are optional and not required for day-to-day development.
+Run these scripts from an elevated PowerShell or Command Prompt session. Otherwise, prefer `npm run setup` for the fastest experience.
 
 ## 🎯 First Launch Setup
 

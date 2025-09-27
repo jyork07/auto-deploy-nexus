@@ -24,29 +24,31 @@
 
 ## 📦 Quick Installation
 
-Getting up and running only requires Node.js (version 20 or later) and npm.
+### One-command setup (recommended)
+
+1. Install [Node.js 20 LTS](https://nodejs.org/) if you haven't already.
+2. From the project folder, run the automated setup assistant:
+
+   ```bash
+   npm run setup
+   ```
+
+   The script verifies your Node.js version, installs dependencies, offers to install the optional Electron tooling, and can start the Vite dev server for you.
+
+   > **Tip:** For unattended environments use `npm run setup -- --yes --skip-dev` to accept the defaults, skip interactive prompts, and prevent the dev server from launching automatically.
+
+When the setup finishes (or you start the dev server yourself), ViraPilot is available at [http://localhost:5173/](http://localhost:5173/) with live hot-reloading.
+
+### Manual installation (advanced)
+
+If you prefer to run each step yourself:
 
 ```bash
-# 1. Install dependencies
+# Install dependencies
 npm install
 
-# 2. Start the Vite development server
+# Start the Vite development server
 npm run dev
-```
-
-The app is now available at http://localhost:5173/ and hot-reloads as you work.
-
-### Building the production bundle
-
-```bash
-# Generate the optimized frontend assets
-npm run build
-
-# (Optional) Preview the production build locally
-npm run preview
-
-# Run the code quality checks
-npm run lint
 ```
 
 ### Packaging the desktop app (optional)
@@ -64,6 +66,19 @@ npm run lint
    ```
 
 3. The packaged binaries are placed in `electron/release/`.
+
+### Building the production bundle
+
+```bash
+# Generate the optimized frontend assets
+npm run build
+
+# (Optional) Preview the production build locally
+npm run preview
+
+# Run the code quality checks
+npm run lint
+```
 
 ### Windows one-click installer (optional)
 
