@@ -1,232 +1,195 @@
 @echo off
-title ViraPilot v2.0 - Quick Start
-color 0A
-mode con cols=80 lines=30
+setlocal EnableExtensions EnableDelayedExpansion
 
+pushd "%~dp0" >nul
+set "ROOT_DIR=%CD%"
+set "LOG_FILE=%ROOT_DIR%\setup.log"
+
+if exist "%LOG_FILE%" del "%LOG_FILE%" >nul 2>&1
+
+call :log "==== ViraPilot automated setup started ===="
+call :print_header
+
+call :log "Checking required tooling"
+call :check_node || goto :fail
+call :check_npm || goto :fail
+call :check_git || goto :fail
+call :check_python || goto :fail
+
+call :log "Installing workspace dependencies"
+call :install_workspace_dependencies || goto :fail
+
+call :log "Building web application"
+call :build_frontend || goto :fail
+
+call :log "Installing Electron dependencies"
+call :install_electron_dependencies || goto :fail
+
+call :log "Packaging Electron application"
+call :build_electron || goto :fail
+
+call :success
+popd >nul
+exit /b 0
+
+:fail
+set "EXIT_CODE=%ERRORLEVEL%"
+color 0C
+echo.
+echo ========================================
+echo ❌ Setup failed
+echo ========================================
+echo Review the messages above and "%LOG_FILE%" for details.
+echo Once resolved, run START-HERE.bat again.
+call :log "Setup failed with exit code %EXIT_CODE%"
+popd >nul
+exit /b %EXIT_CODE%
+
+:print_header
+title ViraPilot v2.0 - Automated Setup
+color 0A
 echo.
 echo  ██╗   ██╗██╗██████╗  █████╗ ██████╗ ██╗██╗      ██████╗ ████████╗
 echo  ██║   ██║██║██╔══██╗██╔══██╗██╔══██╗██║██║     ██╔═══██╗╚══██╔══╝
-echo  ██║   ██║██║██████╔╝███████║██████╔╝██║██║     ██║   ██║   ██║   
-echo  ╚██╗ ██╔╝██║██╔══██╗██╔══██║██╔═══╝ ██║██║     ██║   ██║   ██║   
-echo   ╚████╔╝ ██║██║  ██║██║  ██║██║     ██║███████╗╚██████╔╝   ██║   
-echo    ╚═══╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝ ╚═════╝    ╚═╝   
+echo  ██║   ██║██║██████╔╝███████║██████╔╝██║██║     ██║   ██║   ██║
+echo  ╚██╗ ██╔╝██║██╔══██╗██╔══██║██╔═══╝ ██║██║     ██║   ██║   ██║
+echo   ╚████╔╝ ██║██║  ██║██║  ██║██║     ██║███████╗╚██████╔╝   ██║
+echo    ╚═══╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝ ╚═════╝    ╚═╝
 echo.
 echo                    Advanced AI Pipeline Management v2.0
 echo.
-echo ========================================================================
-echo                           WELCOME TO VIRAPILOT!
-echo ========================================================================
+echo ========================================
+echo One-click local build and packaging
+echo ========================================
 echo.
-echo This is your complete AI Pipeline Management System with:
-echo.
-echo 🧠 Multi-AI Model Support (GPT-4, Claude, Gemini Pro, etc.)
-echo ⚡ Real-time Pipeline Monitoring 
-echo 🔐 Local Settings Storage (No cloud dependency)
-echo 📊 Advanced Analytics and Insights
-echo 💻 Standalone Desktop Application
-echo 🎨 Beautiful Modern Interface
-echo.
-echo ========================================================================
-echo                          INSTALLATION OPTIONS
-echo ========================================================================
-echo.
-echo [1] QUICK INSTALL (Recommended)
-echo     - One-click installation with all dependencies
-echo     - Automatic desktop shortcut creation
-echo     - Complete setup in 10-15 minutes
-echo.
-echo [2] READ INSTALLATION GUIDE
-echo     - Detailed step-by-step instructions
-echo     - Troubleshooting information
-echo     - Manual installation options
-echo.
-echo [3] LAUNCH VIRAPILOT (if already installed)
-echo     - Start the desktop application
-echo     - Access your AI pipeline dashboard
-echo.
-echo [4] SYSTEM REQUIREMENTS CHECK
-echo     - Verify your system compatibility
-echo     - Check prerequisites
-echo.
-echo [5] EXIT
-echo.
-echo ========================================================================
+exit /b 0
 
-:menu
-set /p choice="Please select an option (1-5): "
-
-if "%choice%"=="1" goto quick_install
-if "%choice%"=="2" goto read_guide  
-if "%choice%"=="3" goto launch_app
-if "%choice%"=="4" goto system_check
-if "%choice%"=="5" goto exit
-echo Invalid choice. Please enter 1, 2, 3, 4, or 5.
-goto menu
-
-:quick_install
-echo.
-echo Starting Quick Installation...
-echo.
-echo This will:
-echo - Install Node.js, Git, Python, and Visual Studio Build Tools
-echo - Build the ViraPilot application
-echo - Create desktop and start menu shortcuts
-echo - Require administrator privileges
-echo.
-set /p confirm="Continue with installation? (Y/N): "
-if /i "%confirm%"=="Y" (
-    echo.
-    echo Launching installer...
-    call "%~dp0build-scripts\quick-install.bat"
-) else (
-    echo Installation cancelled.
-    goto menu
+:check_node
+where node >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Node.js was not found on PATH.
+    echo         Install Node.js 18+ and re-run this setup.
+    call :log "Node.js missing"
+    exit /b 1
 )
-goto end
+set "NODE_VERSION="
+for /f "usebackq tokens=*" %%v in (`node --version 2^>nul`) do if not defined NODE_VERSION set "NODE_VERSION=%%v"
+if not defined NODE_VERSION set "NODE_VERSION=detected"
+echo [OK] Node.js detected - %NODE_VERSION%
+call :log "Node.js %NODE_VERSION%"
+exit /b 0
 
-:read_guide
-echo.
-echo Opening Installation Guide...
-if exist "%~dp0INSTALLATION-GUIDE.md" (
-    start notepad "%~dp0INSTALLATION-GUIDE.md"
-) else (
-    echo Installation guide not found. Opening README.md instead...
-    if exist "%~dp0README.md" (
-        start notepad "%~dp0README.md"
-    ) else (
-        echo Documentation files not found.
-    )
+:check_npm
+where npm >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] npm was not found on PATH.
+    echo         npm is installed with Node.js; reinstall Node.js if needed.
+    call :log "npm missing"
+    exit /b 1
 )
-goto menu
+set "NPM_VERSION="
+for /f "usebackq tokens=*" %%v in (`npm --version 2^>nul`) do if not defined NPM_VERSION set "NPM_VERSION=%%v"
+if not defined NPM_VERSION set "NPM_VERSION=detected"
+echo [OK] npm detected - version %NPM_VERSION%
+call :log "npm %NPM_VERSION%"
+exit /b 0
 
-:launch_app
-echo.
-echo Checking for ViraPilot installation...
-if exist "%~dp0electron\release\win-unpacked\ViraPilot.exe" (
-    echo Found! Launching ViraPilot...
-    start "" "%~dp0electron\release\win-unpacked\ViraPilot.exe"
-    echo.
-    echo ViraPilot launched successfully!
-    echo If the application doesn't appear, check your taskbar.
-) else if exist "%ProgramFiles%\ViraPilot\electron\release\win-unpacked\ViraPilot.exe" (
-    echo Found! Launching ViraPilot from Program Files...
-    start "" "%ProgramFiles%\ViraPilot\electron\release\win-unpacked\ViraPilot.exe"
-    echo.
-    echo ViraPilot launched successfully!
-) else (
-    echo ViraPilot not found. Please install it first using option 1.
+:check_git
+where git >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Git was not found on PATH.
+    echo         Install Git for Windows from https://git-scm.com/download/win
+    call :log "Git missing"
+    exit /b 1
 )
-goto menu
+set "GIT_VERSION="
+for /f "tokens=3" %%v in ('git --version 2^>nul') do if not defined GIT_VERSION set "GIT_VERSION=%%v"
+if not defined GIT_VERSION set "GIT_VERSION=detected"
+echo [OK] Git detected - version %GIT_VERSION%
+call :log "Git %GIT_VERSION%"
+exit /b 0
 
-:system_check
-echo.
-echo ========================================================================
-echo                          SYSTEM REQUIREMENTS CHECK
-echo ========================================================================
-echo.
-
-:: Check Windows version
-echo Checking Windows version...
-for /f "tokens=4-7 delims=[.] " %%i in ('ver') do (
-    if %%i==10 (
-        echo ✅ Windows 10 detected - Compatible
-    ) else if %%i==11 (
-        echo ✅ Windows 11 detected - Compatible  
-    ) else (
-        echo ❌ Unsupported Windows version - Requires Windows 10 or 11
-    )
+:check_python
+where python >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Python 3 was not found on PATH.
+    echo         Install Python 3.11+ and include it in PATH during setup.
+    call :log "Python missing"
+    exit /b 1
 )
+set "PY_VERSION="
+for /f "usebackq tokens=2" %%v in (`python --version 2^>^&1`) do if not defined PY_VERSION set "PY_VERSION=%%v"
+if not defined PY_VERSION set "PY_VERSION=detected"
+echo [OK] Python detected - version %PY_VERSION%
+call :log "Python %PY_VERSION%"
+exit /b 0
 
-:: Check for 64-bit
+:install_workspace_dependencies
 echo.
-echo Checking system architecture...
-if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-    echo ✅ 64-bit system detected - Compatible
-) else (
-    echo ❌ 32-bit system detected - Requires 64-bit Windows
+echo [STEP 1/4] Installing workspace dependencies...
+call :log "npm install --no-audit --no-fund"
+npm install --no-audit --no-fund
+if errorlevel 1 (
+    call :log "npm install failed"
+    exit /b 1
 )
+exit /b 0
 
-:: Check available memory
+:build_frontend
 echo.
-echo Checking available memory...
-for /f "tokens=2 delims==" %%i in ('wmic computersystem get TotalPhysicalMemory /value') do (
-    set /a ram_gb=%%i/1024/1024/1024 2>nul
+echo [STEP 2/4] Building web application...
+call :log "npm run build"
+npm run build
+if errorlevel 1 (
+    call :log "npm run build failed"
+    exit /b 1
 )
-if defined ram_gb (
-    if %ram_gb% geq 8 (
-        echo ✅ %ram_gb% GB RAM detected - Excellent
-    ) else if %ram_gb% geq 4 (
-        echo ⚠️ %ram_gb% GB RAM detected - Minimum requirements met
-    ) else (
-        echo ❌ %ram_gb% GB RAM detected - Insufficient ^(4 GB minimum^)
-    )
-) else (
-    echo ❓ Could not determine RAM amount
+exit /b 0
+
+:install_electron_dependencies
+echo.
+echo [STEP 3/4] Installing Electron dependencies...
+call :log "npm install (electron)"
+pushd "%ROOT_DIR%\electron" >nul
+npm install --no-audit --no-fund
+set "NPM_EXIT=%ERRORLEVEL%"
+popd >nul
+if not "%NPM_EXIT%"=="0" (
+    call :log "Electron npm install failed (%NPM_EXIT%)"
+    exit /b %NPM_EXIT%
 )
+exit /b 0
 
-:: Check disk space
+:build_electron
 echo.
-echo Checking disk space on C: drive...
-for /f "tokens=3" %%i in ('dir C:\ /-c ^| find "bytes free"') do (
-    set /a free_gb=%%i/1024/1024/1024 2>nul
+echo [STEP 4/4] Packaging Electron desktop application...
+call :log "npm run build:win"
+pushd "%ROOT_DIR%\electron" >nul
+npm run build:win
+set "BUILD_EXIT=%ERRORLEVEL%"
+popd >nul
+if not "%BUILD_EXIT%"=="0" (
+    call :log "Electron build failed (%BUILD_EXIT%)"
+    exit /b %BUILD_EXIT%
 )
-if defined free_gb (
-    if %free_gb% geq 5 (
-        echo ✅ %free_gb% GB free space - Excellent
-    ) else if %free_gb% geq 2 (
-        echo ⚠️ %free_gb% GB free space - Minimum requirements met  
-    ) else (
-        echo ❌ %free_gb% GB free space - Insufficient ^(2 GB minimum^)
-    )
-) else (
-    echo ❓ Could not determine free disk space
-)
+exit /b 0
 
-:: Check internet connection
+:success
+color 0A
 echo.
-echo Checking internet connection...
-ping -n 1 google.com >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✅ Internet connection - Available
-) else (
-    echo ❌ Internet connection - Not available ^(required for installation^)
-)
+echo ========================================
+echo ✅ Setup complete
+echo ========================================
+echo Desktop installers can be found inside:
+echo     %ROOT_DIR%\electron\release
+echo A detailed log is available at:
+echo     %LOG_FILE%
+call :log "Setup completed successfully"
+exit /b 0
 
-:: Check admin privileges
-echo.
-echo Checking administrator privileges...
-net session >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✅ Administrator privileges - Available
-) else (
-    echo ❌ Administrator privileges - Required for installation
-    echo    ^(Right-click this file and select "Run as administrator"^)
-)
+:log
+set "MESSAGE=%~1"
+if not defined MESSAGE set "MESSAGE="
+>>"%LOG_FILE%" echo [%DATE% %TIME%] %MESSAGE%
+exit /b 0
 
-echo.
-echo ========================================================================
-echo System check completed. Review the results above.
-echo ========================================================================
-echo.
-pause
-goto menu
-
-:exit
-echo.
-echo Thank you for choosing ViraPilot!
-echo.
-echo If you need help:
-echo - Read the INSTALLATION-GUIDE.md file
-echo - Check the README.md for detailed information  
-echo - Visit our GitHub repository for support
-echo.
-timeout /t 3 >nul
-exit
-
-:end
-echo.
-echo ========================================================================
-echo Installation process completed.
-echo Check the installation window for results.
-echo ========================================================================
-pause
