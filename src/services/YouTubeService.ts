@@ -1,5 +1,3 @@
-import { ApiKey } from '@/types/settings';
-
 interface TrendingVideo {
   id: string;
   title: string;
@@ -30,6 +28,16 @@ interface YouTubeSearchParams {
   category?: string;
   maxResults?: number;
   shortsOnly?: boolean;
+}
+
+interface YouTubeSearchItem {
+  id: {
+    videoId: string;
+  };
+}
+
+interface YouTubeSearchResponse {
+  items: YouTubeSearchItem[];
 }
 
 export class YouTubeService {
@@ -97,10 +105,10 @@ export class YouTubeService {
         throw new Error(`YouTube API error: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      
+      const data: YouTubeSearchResponse = await response.json();
+
       // Get detailed video information
-      const videoIds = data.items.map((item: any) => item.id.videoId).join(',');
+      const videoIds = data.items.map(item => item.id.videoId).join(',');
       const detailsResponse = await fetch(
         `https://www.googleapis.com/youtube/v3/videos?` +
         `part=snippet,statistics,contentDetails&` +
@@ -108,8 +116,8 @@ export class YouTubeService {
         `key=${this.apiKey}`
       );
 
-      const detailsData = await detailsResponse.json();
-      return detailsData.items as TrendingVideo[];
+      const detailsData = (await detailsResponse.json()) as { items: TrendingVideo[] };
+      return detailsData.items;
     } catch (error) {
       console.error('Error searching shorts:', error);
       throw error;

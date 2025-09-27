@@ -22,52 +22,67 @@
 - **📈 System Monitoring**: CPU, memory, storage, and network monitoring
 - **🎯 AI Insights**: Smart recommendations for pipeline optimization
 
-## 📦 Quick Installation (Windows)
+## 📦 Quick Installation
 
-### One-Click Installer (Recommended)
+### One-command setup (recommended)
 
-1. **Download and Run**: Simply double-click `build-scripts/quick-install.bat`
-2. **Administrator Rights**: The installer will request administrator privileges
-3. **Automated Setup**: All dependencies and the application will be installed automatically
-4. **Desktop Shortcut**: A shortcut will be created on your desktop
-5. **Launch**: Double-click the desktop shortcut to start ViraPilot
+1. Install [Node.js 20 LTS](https://nodejs.org/) if you haven't already.
+2. From the project folder, run the automated setup assistant:
 
-### What the Installer Does:
-- ✅ Installs Node.js (if not present)
-- ✅ Installs Git (if not present)  
-- ✅ Installs Python (if not present)
-- ✅ Installs Visual Studio Build Tools
-- ✅ Builds the React frontend
-- ✅ Packages the Electron desktop app
-- ✅ Creates desktop and start menu shortcuts
-- ✅ Registers for Windows Add/Remove Programs
-
-## 🛠️ Manual Installation
-
-### Prerequisites
-- Windows 10/11 (64-bit)
-- Administrator privileges
-- Internet connection for dependency downloads
-
-### Step-by-Step Guide
-
-1. **Install Dependencies** (if not already installed):
    ```bash
-   # Run the dependency installer
-   build-scripts/install-dependencies.bat
+   npm run setup
    ```
 
-2. **Build the Application**:
+   The script verifies your Node.js version, installs dependencies, offers to install the optional Electron tooling, and can start the Vite dev server for you.
+
+   > **Tip:** For unattended environments use `npm run setup -- --yes --skip-dev` to accept the defaults, skip interactive prompts, and prevent the dev server from launching automatically.
+
+When the setup finishes (or you start the dev server yourself), ViraPilot is available at [http://localhost:5173/](http://localhost:5173/) with live hot-reloading.
+
+### Manual installation (advanced)
+
+If you prefer to run each step yourself:
+
+```bash
+# Install dependencies
+npm install
+
+# Start the Vite development server
+npm run dev
+```
+
+### Packaging the desktop app (optional)
+
+1. Build the web assets as shown above (`npm run build`).
+2. Install the Electron dependencies and run the desired packaging target:
+
    ```bash
-   # Build the complete application
-   build-scripts/build.bat
+   cd electron
+   npm install
+   # Choose the platform-specific build:
+   npm run build:win   # Windows
+   npm run build:mac   # macOS
+   npm run build:linux # Linux
    ```
 
-3. **Launch ViraPilot**:
-   ```bash
-   # Start the desktop application
-   electron/release/win-unpacked/ViraPilot.exe
-   ```
+3. The packaged binaries are placed in `electron/release/`.
+
+### Building the production bundle
+
+```bash
+# Generate the optimized frontend assets
+npm run build
+
+# (Optional) Preview the production build locally
+npm run preview
+
+# Run the code quality checks
+npm run lint
+```
+
+### Windows support
+
+The automated setup script runs on Windows, macOS, and Linux. If you're on Windows and run into permission prompts, launch the terminal **as Administrator** before executing `npm run setup` so the dependency installation can succeed without manual retries.
 
 ## 🔧 Configuration
 
@@ -137,8 +152,8 @@
 - Disable antivirus temporarily during installation
 
 **Application Won't Start**:
-- Check if all dependencies are installed
-- Run `build-scripts/install-dependencies.bat` again
+- Check if all dependencies are installed by re-running `npm run setup`
+- Inspect the terminal output for errors and resolve any missing prerequisites
 - Check Windows Event Viewer for error details
 
 **API Keys Not Working**:

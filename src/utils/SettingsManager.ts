@@ -1,5 +1,12 @@
 import { AppSettings, ApiKey, DEFAULT_SETTINGS } from '@/types/settings';
 
+interface SettingsExportData {
+  settings?: Partial<AppSettings>;
+  apiKeys?: ApiKey[];
+  exportDate?: string;
+  version?: string;
+}
+
 export class SettingsManager {
   private static SETTINGS_KEY = 'virapilot-settings';
   private static API_KEYS_KEY = 'virapilot-api-keys';
@@ -75,7 +82,7 @@ export class SettingsManager {
     };
   }
 
-  static importConfiguration(data: any): boolean {
+  static importConfiguration(data: SettingsExportData): boolean {
     try {
       if (data.settings) {
         this.saveSettings({ ...DEFAULT_SETTINGS, ...data.settings });
