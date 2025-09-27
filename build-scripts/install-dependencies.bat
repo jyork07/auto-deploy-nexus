@@ -182,6 +182,7 @@ if defined ProgramFiles(x86) call :augment_path "%ProgramFiles(x86)%\Python311" 
 if defined ProgramFiles(x86) call :augment_path "%ProgramFiles(x86)%\Python311\Scripts" "pip.exe"
 exit /b 0
 
+:vs_build_tools
 :ensure_vs_build_tools
 if defined ProgramFiles(x86) (
     set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
