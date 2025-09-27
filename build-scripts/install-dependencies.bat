@@ -1,3 +1,4 @@
+
 @echo off
 echo ========================================
 echo ViraPilot v2.0 - Dependency Installer
@@ -21,83 +22,77 @@ cd /d "%TEMP%\virapilot-setup"
 node --version >nul 2>&1
 if %errorlevel% equ 0 (
     echo Node.js is already installed.
-    goto :git_check
+) else (
+    echo Installing Node.js...
+    :: Download Node.js installer
+    powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v20.10.0/node-v20.10.0-x64.msi' -OutFile 'nodejs.msi'"
+    if %errorlevel% neq 0 (
+        echo ERROR: Failed to download Node.js
+        pause
+        exit /b 1
+    )
+
+    :: Install Node.js silently
+    msiexec /i nodejs.msi /quiet /norestart
+    if %errorlevel% neq 0 (
+        echo ERROR: Failed to install Node.js
+        pause
+        exit /b 1
+    )
+
+    echo Node.js installed successfully.
 )
 
-echo Installing Node.js...
-:: Download Node.js installer
-powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v20.10.0/node-v20.10.0-x64.msi' -OutFile 'nodejs.msi'"
-if %errorlevel% neq 0 (
-    echo ERROR: Failed to download Node.js
-    pause
-    exit /b 1
-)
-
-:: Install Node.js silently
-msiexec /i nodejs.msi /quiet /norestart
-if %errorlevel% neq 0 (
-    echo ERROR: Failed to install Node.js
-    pause
-    exit /b 1
-)
-
-echo Node.js installed successfully.
-
-:git_check
 :: Check if Git is already installed
 git --version >nul 2>&1
 if %errorlevel% equ 0 (
     echo Git is already installed.
-    goto :python_check
+) else (
+    echo Installing Git...
+    :: Download Git installer
+    powershell -Command "Invoke-WebRequest -Uri 'https://github.com/git-for-windows/git/releases/latest/download/Git-2.42.0-64-bit.exe' -OutFile 'git-installer.exe'"
+    if %errorlevel% neq 0 (
+        echo ERROR: Failed to download Git
+        pause
+        exit /b 1
+    )
+
+    :: Install Git silently
+    git-installer.exe /VERYSILENT /NORESTART
+    if %errorlevel% neq 0 (
+        echo ERROR: Failed to install Git
+        pause
+        exit /b 1
+    )
+
+    echo Git installed successfully.
 )
 
-echo Installing Git...
-:: Download Git installer
-powershell -Command "Invoke-WebRequest -Uri 'https://github.com/git-for-windows/git/releases/latest/download/Git-2.42.0-64-bit.exe' -OutFile 'git-installer.exe'"
-if %errorlevel% neq 0 (
-    echo ERROR: Failed to download Git
-    pause
-    exit /b 1
-)
-
-:: Install Git silently
-git-installer.exe /VERYSILENT /NORESTART
-if %errorlevel% neq 0 (
-    echo ERROR: Failed to install Git
-    pause
-    exit /b 1
-)
-
-echo Git installed successfully.
-
-:python_check
 :: Check if Python is already installed
 python --version >nul 2>&1
 if %errorlevel% equ 0 (
     echo Python is already installed.
-    goto vs_build_tools
+) else (
+    echo Installing Python...
+    :: Download Python installer
+    powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe' -OutFile 'python-installer.exe'"
+    if %errorlevel% neq 0 (
+        echo ERROR: Failed to download Python
+        pause
+        exit /b 1
+    )
+
+    :: Install Python silently
+    python-installer.exe /quiet InstallAllUsers=1 PrependPath=1
+    if %errorlevel% neq 0 (
+        echo ERROR: Failed to install Python
+        pause
+        exit /b 1
+    )
+
+    echo Python installed successfully.
 )
 
-echo Installing Python...
-:: Download Python installer
-powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe' -OutFile 'python-installer.exe'"
-if %errorlevel% neq 0 (
-    echo ERROR: Failed to download Python
-    pause
-    exit /b 1
-)
-
-:: Install Python silently
-python-installer.exe /quiet InstallAllUsers=1 PrependPath=1
-if %errorlevel% neq 0 (
-    echo ERROR: Failed to install Python
-    pause
-    exit /b 1
-)
-
-echo Python installed successfully.
-
-:vs_build_tools
 :: Install Visual Studio Build Tools (required for native modules)
 echo Installing Visual Studio Build Tools...
 powershell -Command "Invoke-WebRequest -Uri 'https://aka.ms/vs/17/release/vs_buildtools.exe' -OutFile 'vs_buildtools.exe'"
@@ -112,12 +107,17 @@ vs_buildtools.exe --quiet --wait --add Microsoft.VisualStudio.Workload.VCTools -
 if %errorlevel% neq 0 (
     echo WARNING: Visual Studio Build Tools installation may have failed
     echo This might affect native module compilation
+) else (
+    echo Visual Studio Build Tools installed.
 )
 
-echo Visual Studio Build Tools installed.
-
-:: Refresh environment variables
-call refreshenv.cmd >nul 2>&1
+:: Refresh environment variables if refreshenv is available
+where refreshenv >nul 2>&1
+if %errorlevel% equ 0 (
+    call refreshenv >nul 2>&1
+) else (
+    echo Skipping environment variable refresh because refreshenv.cmd was not found.
+)
 
 echo.
 echo ========================================
