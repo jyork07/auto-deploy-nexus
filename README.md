@@ -32,6 +32,23 @@
 4. **Desktop Shortcut**: A shortcut will be created on your desktop
 5. **Launch**: Double-click the desktop shortcut to start ViraPilot
 
+### PowerShell Automation (New)
+
+Prefer working from a terminal? Use the PowerShell automation script for a more transparent, step-by-step setup.
+
+```powershell
+# From an elevated PowerShell window in the repository root
+Set-ExecutionPolicy -Scope Process Bypass
+./build-scripts/setup.ps1 -UseWinget
+```
+
+Key improvements:
+
+- **Winget support** – Automatically installs Node.js LTS, Git, and Python 3.11 when `-UseWinget` is supplied.
+- **Transcript logging** – Generates `setup-transcript.log` (configurable via `-TranscriptPath`) for troubleshooting.
+- **Flexible packaging** – Pass `-SkipPackaging` to prepare the workspace without producing the Windows installer.
+- **Friendly output** – Clear sections and error handling for each major step.
+
 ### What the Installer Does:
 - ✅ Installs Node.js (if not present)
 - ✅ Installs Git (if not present)  
