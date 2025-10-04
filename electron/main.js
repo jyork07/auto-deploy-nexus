@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
+const configManager = require('./config-manager');
 const isDev = process.env.NODE_ENV === 'development';
 
 // Keep a global reference of the window object
@@ -250,6 +251,10 @@ ipcMain.handle('get-app-version', () => {
   return app.getVersion();
 });
 
+ipcMain.handle('get-version', () => {
+  return app.getVersion();
+});
+
 ipcMain.handle('show-message-box', async (event, options) => {
   const result = await dialog.showMessageBox(mainWindow, options);
   return result;
@@ -258,6 +263,44 @@ ipcMain.handle('show-message-box', async (event, options) => {
 ipcMain.handle('show-save-dialog', async (event, options) => {
   const result = await dialog.showSaveDialog(mainWindow, options);
   return result;
+});
+
+// Config file operations
+ipcMain.handle('read-config-file', (event, filename) => {
+  return configManager.readConfigFile(filename);
+});
+
+ipcMain.handle('write-config-file', (event, filename, content) => {
+  return configManager.writeConfigFile(filename, content);
+});
+
+ipcMain.handle('delete-file', (event, filename) => {
+  return configManager.deleteFile(filename);
+});
+
+// File operations
+ipcMain.handle('read-file', (event, filepath) => {
+  return configManager.readFile(filepath);
+});
+
+ipcMain.handle('write-file', (event, filepath, content) => {
+  return configManager.writeFile(filepath, content);
+});
+
+// Dialog operations
+ipcMain.handle('save-dialog', async (event, options) => {
+  const result = await dialog.showSaveDialog(mainWindow, options);
+  return result.canceled ? null : result.filePath;
+});
+
+ipcMain.handle('open-dialog', async (event, options) => {
+  const result = await dialog.showOpenDialog(mainWindow, options);
+  return result.canceled ? null : result.filePaths[0];
+});
+
+// System info
+ipcMain.handle('get-config-dir', () => {
+  return configManager.getConfigDirectory();
 });
 
 // Prevent new window creation

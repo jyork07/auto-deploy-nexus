@@ -33,7 +33,7 @@ export const SettingsPanel = () => {
 
   // Load settings on component mount
   useEffect(() => {
-    setApiKeys(SettingsManager.loadApiKeys());
+    setApiKeys(SettingsManager.loadApiKeys() as ApiKey[]);
     setSettings(SettingsManager.loadSettings());
   }, []);
 
@@ -41,11 +41,11 @@ export const SettingsPanel = () => {
     const isValid = SettingsManager.validateApiKey(service, key);
     const updatedKeys = apiKeys.map(apiKey => 
       apiKey.service === service 
-        ? { ...apiKey, key, status: key ? (isValid ? "valid" : "invalid") : "untested" }
+        ? { ...apiKey, key, status: (key ? (isValid ? "valid" : "invalid") : "untested") as ApiKey['status'] }
         : apiKey
     );
-    setApiKeys(updatedKeys);
-    SettingsManager.saveApiKeys(updatedKeys);
+    setApiKeys(updatedKeys as ApiKey[]);
+    SettingsManager.saveApiKeys(updatedKeys as ApiKey[]);
     
     toast({
       title: "API Key Saved",
@@ -159,10 +159,10 @@ export const SettingsPanel = () => {
                         onChange={(e) => {
                           const updatedKeys = apiKeys.map(k => 
                             k.service === apiKey.service 
-                              ? { ...k, key: e.target.value, status: "untested" }
+                              ? { ...k, key: e.target.value, status: "untested" as ApiKey['status'] }
                               : k
                           );
-                          setApiKeys(updatedKeys);
+                          setApiKeys(updatedKeys as ApiKey[]);
                         }}
                         className="pr-10"
                       />
