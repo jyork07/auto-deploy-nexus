@@ -1,4 +1,5 @@
-import { ApiKey } from '@/types/settings';
+import { google, youtube_v3 } from 'googleapis';
+import fs from 'fs';
 
 interface TrendingVideo {
   id: string;
@@ -34,9 +35,26 @@ interface YouTubeSearchParams {
 
 export class YouTubeService {
   private apiKey: string;
+  private youtube: youtube_v3.Youtube;
+  private oauth2Client?: any;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, oauth2Credentials?: { client_id: string; client_secret: string; refresh_token: string }) {
     this.apiKey = apiKey;
+    this.youtube = google.youtube({
+      version: 'v3',
+      auth: apiKey
+    });
+
+    if (oauth2Credentials) {
+      this.oauth2Client = new google.auth.OAuth2(
+        oauth2Credentials.client_id,
+        oauth2Credentials.client_secret,
+        'urn:ietf:wg:oauth:2.0:oob'
+      );
+      this.oauth2Client.setCredentials({
+        refresh_token: oauth2Credentials.refresh_token
+      });
+    }
   }
 
   async fetchTrendingVideos(params: YouTubeSearchParams = {}): Promise<TrendingVideo[]> {
@@ -124,12 +142,44 @@ export class YouTubeService {
     privacy: 'private' | 'unlisted' | 'public';
     filePath: string;
   }): Promise<string> {
-    // This would require OAuth2 implementation for actual uploads
-    // For now, simulate the upload process
-    console.log('Simulating video upload:', videoData);
-    
-    // Return a mock video ID
-    return `mock_video_${Date.now()}`;
+    if (!this.oauth2Client) {
+      throw new Error('OAuth2 credentials not configured for upload');
+    }
+
+    if (!fs.existsSync(videoData.filePath)) {
+      throw new Error(`Video file not found: ${videoData.filePath}`);
+    }
+
+    try {
+      const youtubeWithAuth = google.youtube({
+        version: 'v3',
+        auth: this.oauth2Client
+      });
+
+      const response = await youtubeWithAuth.videos.insert({
+        part: ['snippet', 'status'],
+        requestBody: {
+          snippet: {
+            title: videoData.title,
+            description: videoData.description,
+            tags: videoData.tags,
+            categoryId: videoData.categoryId
+          },
+          status: {
+            privacyStatus: videoData.privacy,
+            selfDeclaredMadeForKids: false
+          }
+        },
+        media: {
+          body: fs.createReadStream(videoData.filePath)
+        }
+      });
+
+      return response.data.id || 'unknown';
+    } catch (error) {
+      console.error('YouTube upload error:', error);
+      throw error;
+    }
   }
 
   private parseDuration(duration: string): number {

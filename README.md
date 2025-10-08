@@ -22,42 +22,47 @@
 - **📈 System Monitoring**: CPU, memory, storage, and network monitoring
 - **🎯 AI Insights**: Smart recommendations for pipeline optimization
 
-## 📦 Quick Installation (Windows)
+## 📦 Quick Installation
 
-### One-Click Installer (Recommended)
+### Simple Installation (All Platforms)
 
-1. **Download and Run**: Simply double-click `build-scripts/quick-install.bat`
-2. **Administrator Rights**: The installer will request administrator privileges
-3. **Automated Setup**: All dependencies and the application will be installed automatically
-4. **Desktop Shortcut**: A shortcut will be created on your desktop
-5. **Launch**: Double-click the desktop shortcut to start ViraPilot
-
-### PowerShell Automation (New)
-
-Prefer working from a terminal? Use the PowerShell automation script for a more transparent, step-by-step setup.
-
-```powershell
-# From an elevated PowerShell window in the repository root
-Set-ExecutionPolicy -Scope Process Bypass
-./build-scripts/setup.ps1 -UseWinget
+**Windows:**
+```bash
+INSTALL.bat
 ```
 
-Key improvements:
+**Mac/Linux:**
+```bash
+chmod +x INSTALL.sh
+./INSTALL.sh
+```
 
-- **Winget support** – Automatically installs Node.js LTS, Git, and Python 3.11 when `-UseWinget` is supplied.
-- **Transcript logging** – Generates `setup-transcript.log` (configurable via `-TranscriptPath`) for troubleshooting.
-- **Flexible packaging** – Pass `-SkipPackaging` to prepare the workspace without producing the Windows installer.
-- **Friendly output** – Clear sections and error handling for each major step.
+This will:
+- ✅ Check for Node.js 18+
+- ✅ Install all npm dependencies
+- ✅ Build the application
 
-### What the Installer Does:
-- ✅ Installs Node.js (if not present)
-- ✅ Installs Git (if not present)  
-- ✅ Installs Python (if not present)
-- ✅ Installs Visual Studio Build Tools
-- ✅ Builds the React frontend
-- ✅ Packages the Electron desktop app
-- ✅ Creates desktop and start menu shortcuts
-- ✅ Registers for Windows Add/Remove Programs
+### Prerequisites
+
+Before installing, ensure you have:
+
+1. **Node.js 18+** - [Download](https://nodejs.org/)
+2. **FFmpeg** - Required for video processing
+   - Windows: Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH
+   - Mac: `brew install ffmpeg`
+   - Linux: `sudo apt install ffmpeg`
+3. **yt-dlp** - Required for video downloading
+   - Windows: Download from [github.com/yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp/releases) and add to PATH
+   - Mac: `brew install yt-dlp`
+   - Linux: `pip install yt-dlp`
+
+### Verify Installation
+
+```bash
+node --version    # Should be v18 or higher
+ffmpeg -version
+yt-dlp --version
+```
 
 ## 🛠️ Manual Installation
 
@@ -88,20 +93,31 @@ Key improvements:
 
 ## 🔧 Configuration
 
+### API Keys Setup
+
+ViraPilot requires API keys to function. See [SETUP.md](SETUP.md) for detailed instructions.
+
+**Required APIs:**
+1. **YouTube Data API v3** - For content discovery and upload
+2. **OpenAI or Anthropic** - For AI content analysis
+3. **TikTok API** (Optional) - For TikTok uploads
+
 ### First Time Setup
 
-1. **Launch ViraPilot** from desktop shortcut
-2. **Navigate to Settings Tab**
-3. **Enter API Keys**:
-   - OpenAI API Key
-   - Anthropic API Key (for Claude)
-   - Google AI API Key (for Gemini)
-   - Azure OpenAI credentials
+1. **Start the application**: `npm run dev`
+2. **Navigate to Settings Tab** in the web interface
+3. **Enter API Keys** in the Settings panel
+4. **Configure Pipeline Settings**:
+   - Fetch interval
+   - Content region
+   - AI scoring threshold
+   - Upload preferences
 
-### Local Storage
-- All settings are stored locally in browser storage
-- No data is transmitted to external servers (except AI service APIs)
-- Export/import configuration for backup
+### Data Storage
+
+- **Supabase Database**: Content tracking, pipeline runs, analytics
+- **Settings**: API keys stored securely in Supabase
+- **Processed Videos**: Saved to `./processed_videos` directory
 
 ## 📋 System Requirements
 
@@ -121,21 +137,35 @@ Key improvements:
 
 ## 🎯 Usage
 
+### Running the Application
+
+**Development Mode:**
+```bash
+npm run dev
+```
+Access at: `http://localhost:5173`
+
+**Production Mode:**
+```bash
+npm run build
+npm run preview
+```
+
 ### Starting Your First Pipeline
 
-1. **Configure API Keys**: Go to Settings → API Keys tab
-2. **Select AI Model**: Choose from GPT-4, Claude, Gemini Pro, etc.
-3. **Input Data**: Enter your prompt or data in the Pipeline tab
-4. **Start Processing**: Click "Start Pipeline" button
-5. **Monitor Progress**: Watch real-time progress in the Overview tab
+1. **Configure API Keys**: Go to Settings panel and add your API keys
+2. **Configure Pipeline**: Set region, scoring threshold, and preferences
+3. **Start Autopilot**: Click "Start Pipeline" to begin automated processing
+4. **Monitor Progress**: View real-time updates in the dashboard
+5. **Review Results**: Check processed content in Supabase dashboard
 
-### Dashboard Tabs
+### Features
 
-- **📊 Overview**: System status and pipeline monitoring
-- **⚡ Pipeline**: Configure and manage AI processing jobs
-- **🧠 AI Insights**: Performance analytics and recommendations
-- **💻 Monitor**: Detailed system resource monitoring  
-- **⚙️ Settings**: API keys, preferences, and configuration
+- **🔍 Content Discovery**: Automatically finds trending videos on YouTube
+- **🧠 AI Scoring**: Analyzes viral potential using OpenAI/Claude
+- **🎬 Video Processing**: Downloads and optimizes videos for platforms
+- **📤 Auto Upload**: Uploads to YouTube Shorts and TikTok
+- **📊 Analytics**: Tracks performance and ROI
 
 ## 🔐 Security Features
 
