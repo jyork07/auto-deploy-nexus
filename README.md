@@ -69,6 +69,10 @@
    electron/release/win-unpacked/ViraPilot.exe
    ```
 
+## 🧪 Jarvis-Style Local Supervisor Reference
+
+If you are building a Windows-first local Jarvis stack (Ollama + OpenClaw + Obsidian + Electron), see `JARVIS-WINDOWS-POWERSHELL-BUILD-PATH.md` for a full PowerShell-oriented build path and manual checkpoints.
+
 ## 🔧 Configuration
 
 ### First Time Setup
