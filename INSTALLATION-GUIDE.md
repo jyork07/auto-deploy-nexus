@@ -36,12 +36,16 @@ Confirm the folder contains files such as `package.json`, `START-HERE.bat`, `ele
    ```cmd
    cd "C:\ViraPilot"
    ```
-3. Start the automated build:
+3. Start the full production setup wizard (recommended):
+   ```cmd
+   npm run setup:wizard
+   ```
+4. Or run the original streamlined setup:
    ```cmd
    npm run setup
    ```
 
-This single command installs every Node/Electron dependency, builds the production React bundle, packages the Electron desktop
+Both setup paths install Node/Electron dependencies, build the production React bundle, and package the Electron desktop
 application, and writes the finished files to `electron\release\win-unpacked`. The first run can take 10–20 minutes depending on
 internet speed.
 
@@ -141,4 +145,3 @@ Then open Windows Event Viewer (Windows Logs → Application) for additional det
 - When opening a ticket, include your Windows version, what step failed, and the exact error message shown in the terminal.
 
 Happy flying! ✈️
-

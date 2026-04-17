@@ -75,8 +75,12 @@ export class SettingsManager {
     };
   }
 
-  static importConfiguration(data: any): boolean {
+  static importConfiguration(data: unknown): boolean {
     try {
+      if (!this.isImportConfiguration(data)) {
+        return false;
+      }
+
       if (data.settings) {
         this.saveSettings({ ...DEFAULT_SETTINGS, ...data.settings });
       }
@@ -168,5 +172,12 @@ export class SettingsManager {
       valid: missing.length === 0,
       missing
     };
+  }
+
+  private static isImportConfiguration(data: unknown): data is {
+    settings?: Partial<typeof DEFAULT_SETTINGS>;
+    apiKeys?: ApiKey[];
+  } {
+    return typeof data === 'object' && data !== null;
   }
 }
