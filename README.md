@@ -1,3 +1,7 @@
+## Windows Jarvis Supervisor Guide
+
+If you are building the Windows-based Jarvis supervisor stack (Ollama + Tailscale + Obsidian + Electron), use: `docs/JARVIS_WINDOWS_SUPERVISOR.md`.
+
 # ViraPilot v2.0 - Advanced AI Pipeline Management System
 
 <div align="center">
