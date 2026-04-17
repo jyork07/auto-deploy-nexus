@@ -63,7 +63,10 @@ If you are building the Windows-based Jarvis supervisor stack (Ollama + Tailscal
 
 2. **Build the Application**:
    ```bash
-   # Build the complete application
+   # Full production setup wizard (recommended)
+   npm run setup:wizard
+
+   # OR classic batch build path
    build-scripts/build.bat
    ```
 
