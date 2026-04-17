@@ -32,6 +32,16 @@ interface YouTubeSearchParams {
   shortsOnly?: boolean;
 }
 
+interface YouTubeSearchItem {
+  id: {
+    videoId: string;
+  };
+}
+
+interface YouTubeSearchResponse {
+  items: YouTubeSearchItem[];
+}
+
 export class YouTubeService {
   private apiKey: string;
 
@@ -97,10 +107,10 @@ export class YouTubeService {
         throw new Error(`YouTube API error: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as YouTubeSearchResponse;
       
       // Get detailed video information
-      const videoIds = data.items.map((item: any) => item.id.videoId).join(',');
+      const videoIds = data.items.map((item) => item.id.videoId).join(',');
       const detailsResponse = await fetch(
         `https://www.googleapis.com/youtube/v3/videos?` +
         `part=snippet,statistics,contentDetails&` +
